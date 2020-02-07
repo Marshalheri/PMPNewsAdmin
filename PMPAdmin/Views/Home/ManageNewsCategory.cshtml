@@ -1,0 +1,241 @@
+﻿@model PMPAdmin.ViewModels.ManageNewsCategoryViewModel
+
+@{
+    ViewBag.Title = "Manage News Category";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int num = 1;
+}
+
+<!-- Content Header (Page header) -->
+<div class="content-header jumbotron">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0 text-dark">@ViewBag.Message</h1>
+            </div><!-- /.col -->
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Home</a></li>
+                    <li class="breadcrumb-item active">ManageNewsCategory</li>
+                </ol>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div>
+<!-- /.content-header -->
+
+<!--Add news card start here...-->
+
+<div class="row">
+    <div class="jumbotron col-md-6 ml-auto mr-auto">
+        <div class="card card-navy">
+            <div class="card-header">
+                <h3 class="card-title"><b>Add New News Category</b></h3>
+
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" data-toggle="tooltip" title="Collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                @Html.ValidationSummary(true, "", new {@class = "text-danger"})
+                @using (Html.BeginForm("ManageNewsCategory", "Home", null, FormMethod.Post, new {role = "form", id="newCategoryForm"}))
+                {
+                    <div class="form-group mb-3">
+                        @Html.AntiForgeryToken()
+                        @Html.EditorFor(m => m.Name,
+                            new
+                            {
+                                htmlAttributes = new
+                                {
+                                    @class = "form-control",
+                                    @placeholder = "Enter the new category name",
+                                    @id = "categoryNameTextBox",
+                                    @required = "true"
+                                }
+                            }
+                            )
+                        @Html.ValidationMessageFor(m => m.Name, "", new { @class="text-danger" })
+                    </div>
+
+                    <button class="btn btn-outline-dark" type="button" id="newCategoryFormBtn">Create Category</button>
+                }
+            </div>
+            <!-- /.card-body -->
+        </div>
+    </div>
+
+    <hr/>
+
+    <div class="col-md-11 ml-auto mr-auto">
+        <div class="card card-navy">
+            <div class="card-header text-center">
+                <h3 class="card-title"><b>Available News Categories</b></h3>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body table-responsive">
+                @{
+                    if (!Model.NewsCategory.Any())
+                    {
+                        <h1 class="text-center"> THERE IS CURRENTLY NO NEWS CATEGORY IN THE DATABASE </h1>
+                    }
+                    else
+                    {
+                        <table id="newsCategoryTable" class="table table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                <th>S/N</th>
+                                <th>Category Name</th>
+                                <th>Added By</th>
+                                <th>Time Added</th>
+                                <th>Action</th>
+                            </tr>
+                            </thead>
+                            <tbody id="CatTable">
+
+                            @foreach (var item in Model.NewsCategory)
+                            {
+                                <tr>
+                                    <td>@num </td>
+                                    <td>@item.Name</td>
+                                    <td>@item.AddedBy</td>
+                                    <td>@item.TimeCreated</td>
+                                    <td>
+                                        <input type="button" class="btn btn-primary" id="editNewsCategoryBtn" onclick="Edit('@item.Id')" value="Edit" />
+                                        <a href="#" class="btn btn-danger">Delete <i class="fas fa-trash-alt"></i></a>
+                                    </td>
+                                </tr>
+                                num = num + 1;
+                            }
+                            
+                            </tbody>
+
+                            <tfoot>
+                            </tfoot>
+                        </table>
+
+                    }
+                }
+                <!-- news category table card-body ends here... -->
+            </div>
+        </div>
+        <!-- news category table ends here... -->
+    </div>
+
+
+</div>
+<div class="spinner-grow-sm" style="text-align: center"><i class="fas fa-spinner"></i></div>
+<!--Add news card ends here....-->
+@section scripts{
+    <script>
+        //$("#newCategoryFormBtn").click(function(e) {
+        //    e.preventDefault();
+        //    alert("Heello world");
+        //    var postData = $("#newCategoryForm").serialize();
+        //    alert(postData);
+        //});
+
+        $("#newCategoryFormBtn").click(function (e) {
+            debugger
+
+            var postData = $("#categoryNameTextBox").val();
+            //var details = {};
+            //details.Name = $("#categoryNameTextBox").val();
+            //var postDat = JSON.stringify(details);
+
+            // client side validation to see if all form fields is valid..
+            if (!$("#newCategoryForm").valid()) {
+                return false;
+            }
+
+            var postUrl = "@Url.Action("ManageNewsCategory", "Home")";
+            $.ajax({
+                url: postUrl,
+                type: "post",
+                data: { categoryName: postData },
+                contentType: "application/json;charset=utf-8",
+                success: function (response) {
+                    $("#categoryNameTextBox").val("");
+                    if (response.status === "Successful") {
+                        $("#CatTable").reload();
+                        //var html = "";
+                        //$.each(response.data,
+                        //    function (index, row) {
+                        //        html = html +
+                        //            ` <tr>  <td>${index + 1}</td>   <td>${row.Name}</td> <td>${row.AddedBy}</td>    <td>${row.TimeCreated}</td> <td>    <input type="button" class="btn btn-primary" id="editNewsCategoryBtn" value="Edit" />       <a href="#" class="btn btn-danger">Delete</a>  </td>   </tr> `;
+
+                        //    });
+                        //$("#CatTable").append(html);
+                    }
+
+                    console.log(response);
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        })
+
+        // Function that handles the event for the register customer modal..
+        //function registerCustomer() {
+        //    location.reload(true);
+        //}
+    </script>
+
+    <!-- category table script -->
+    <script>
+        $(function() {
+            $("#newsCategoryTable").DataTable();
+        });
+    </script>
+}
+
+
+
+@*<script>  
+    $(document).ready(function () {  
+        $("#AddItemForm").validate({  
+            rules: {  
+                Name: "required",  
+                Price: {  
+                    required: true,  
+                    number: true,  
+                    range: [0, 100]  
+                }  
+            },  
+            messages: {  
+                Name: "Please provide item name",  
+                Price: {  
+                    required: "Please provide item price",  
+                    number: "Please provide number only",  
+                    range: "You have to enter price between 0 to 100"  
+                }  
+  
+            }  
+        });  
+    });  
+</script>*@  
+
+@*<script type="text/javascript">
+    $(function () {
+        $("#btnSubmit").click(function () {
+            var formData = new FormData();
+            formData.append("PersonId", $("#PersonId").val());
+            formData.append("Name", $("#Name").val());
+            formData.append("Gender", $("#Gender").val());
+            formData.append("City", $("#City").val());
+            $.ajax({
+                url: "/Home/Index",
+                type: 'POST',
+                cache: false,
+                contentType: false,
+                processData: false,
+                data: formData,
+                success: function (response) {
+                    alert(response);
+                }
+            });
+        });
+    });
+</script>*@

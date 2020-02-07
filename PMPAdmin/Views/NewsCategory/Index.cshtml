@@ -1,0 +1,213 @@
+﻿@*@model IEnumerable<PMPAdmin.Models.NewsCategory>*@
+@model PMPAdmin.ViewModels.ManageNewsCategoryViewModel
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var serialNumber = 1;
+}
+
+<!-- Content Header (Page header) -->
+<div class="content-header jumbotron">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0 text-dark">@ViewBag.Message</h1>
+            </div><!-- /.col -->
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Home</a></li>
+                    <li class="breadcrumb-item active">NewsCategory</li>
+                </ol>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div>
+<!-- /.content-header -->
+<!--Add news card start here...-->
+
+<div class="row">
+    <div class="jumbotron col-md-6 ml-auto mr-auto">
+        <div class="card card-navy">
+            <div class="card-header">
+                <h3 class="card-title"><b>Add New News Category</b></h3>
+
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" data-toggle="tooltip" title="Collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @using (Html.BeginForm("ManageNewsCategory", "Home", null, FormMethod.Post, new { role = "form", id = "newCategoryForm" }))
+                {
+                    <div class="form-group mb-3">
+                        @Html.AntiForgeryToken()
+                        @Html.EditorFor(m => m.Name,
+                            new
+                            {
+                                htmlAttributes = new
+                                {
+                                    @class = "form-control",
+                                    @placeholder = "Enter the new category name",
+                                    @id = "categoryNameTextBox",
+                                    @required = "true"
+                                }
+                            }
+                            )
+                        @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger" })
+                    </div>
+
+                    @Html.Hidden("postUrl", Url.Action("Create", "NewsCategory"))
+                    <button class="btn btn-outline-dark" type="button" id="newCategoryFormBtn">Create Category</button>
+                }
+            </div>
+            <!-- /.card-body -->
+        </div>
+    </div>
+</div>
+
+<div class="col-md-11 ml-auto mr-auto">
+    <div class="card card-navy">
+        <div class="card-header text-center">
+            <h3 class="card-title"><b>Available News Categories</b></h3>
+        </div>
+        <!-- /.card-header -->
+        <div class="card-body table-responsive">
+            @{
+                if (!Model.NewsCategory.Any())
+                {
+                    <h1 class="text-center"> THERE IS CURRENTLY NO NEWS CATEGORY IN THE DATABASE </h1>
+                }
+                else
+                {
+                    <table id="newsCategoryTable" class="table table-bordered table-striped">
+                        <thead>
+                        <tr>
+                            <th>S/N</th>
+                            <th>Category Name</th>
+                            <th>Added By</th>
+                            <th>Time Added</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody id="newsCategoryTableBody">
+
+                        @foreach (var item in Model.NewsCategory)
+                        {
+                            <tr>
+                                <td>@serialNumber </td>
+                                <td>@item.Name</td>
+                                <td>@item.AddedBy</td>
+                                <td>@item.TimeCreated</td>
+                                <td>
+                                    @*<a href="#"
+                                           type="button"
+                                           class="btn btn-primary"
+                                           id="editNewsCategoryBtn"
+                                           onclick="Edit('@item.Id')">Edit</a>*@
+                                    <a href="#"
+                                       type="button"
+                                       class="btn btn-danger"
+                                       @*id="deleteNewsCategoryBtn"*@
+                                       onclick="confirmDeleteCategory(@item.Id)">Delete <i class="fas fa-trash-alt"></i></a>
+                                    @Html.Hidden("deleteUrl", Url.Action("Delete", "NewsCategory"))
+                                    @*<input type="button" class="btn btn-primary" id="detailOfNewsCategoryBtn" onclick="Edit('@item.Id')" value="Edit" />*@
+                                    @*<a href="#" class="btn btn-danger">Delete <i class="fas fa-trash-alt"></i></a>
+                                            @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
+                                            @Html.ActionLink("Details", "Details", new { id = item.Id }) |
+                                            @Html.ActionLink("Delete", "Delete", new { id = item.Id })*@
+                                </td>
+                            </tr>
+                            serialNumber = serialNumber + 1;
+                        }
+
+                        </tbody>
+
+                        <tfoot>
+                        </tfoot>
+                    </table>
+                }
+            }
+            <!-- news category table card-body ends here... -->
+        </div>
+    </div>
+    <!-- news category table ends here... -->
+</div>
+
+<div class="modal fade" id="deleteNewsCategoryModal" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content bg-white">
+            <div class="modal-header">
+                <h4 class="modal-title">Delete News Category</h4>
+            </div>
+            <div class="modal-body">
+                <h3>Are you sure you want to delete this Category?</h3>
+                <dl class="dl-horizontal">
+                    <dt>
+                        @Html.DisplayNameFor(model => model.Name):
+                        <span id="catNameModal"> </span>
+                    </dt>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.TimeCreated):
+                        <span id="catTimeCreatedModal"> </span>
+                    </dt>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.AddedBy):
+                        <span id="catAddedByModal"> </span>
+                    </dt>
+                </dl>
+            </div>
+            <div class="modal-footer">
+                <form id="newsCategoryModalForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="newsCategoryIdInput" />
+                    <div class="justify-content-between">
+                        <button type="button" class="btn btn-outline-dark" data-dismiss="modal">Cancel Delete</button>
+                        <button type="button" 
+                                class="btn btn-outline-success" 
+                                onclick="deleteCategory()" 
+                                id="registerButtondeleteCategoryBtn">Delete Category</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+
+<div class="modal fade" id="spinnerModal" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content bg-white">
+            <div class="modal-header">
+                <h3 class="modal-title">Please wait...</h3>
+            </div>
+            <div class="modal-body">
+                <div class="img-responsive" style="text-align: center">
+                    <img src="~/Content/spinner-img.gif"/>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+
+
+
+@section scripts
+{
+    <script type="text/javascript" src="~/MyJsFiles/NewsCategory.js"></script>
+    <!-- category table script -->
+    <script>
+        $(function () {
+            $("#newsCategoryTable").DataTable();
+        });
+    </script>
+}

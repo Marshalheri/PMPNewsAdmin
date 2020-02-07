@@ -1,0 +1,222 @@
+﻿@model PMPAdmin.Models.RegisterViewModel
+@{
+    Layout = null;
+}
+@*@{
+        ViewBag.Title = "Register";
+    }
+
+    <h2>@ViewBag.Title.</h2>
+
+    @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+    {
+        @Html.AntiForgeryToken()
+        <h4>Create a new account.</h4>
+        <hr />
+        @Html.ValidationSummary("", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(m => m.Email, new { @class = "col-md-2 control-label" })
+            <div class="col-md-10">
+                @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Password, new { @class = "col-md-2 control-label" })
+            <div class="col-md-10">
+                @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.ConfirmPassword, new { @class = "col-md-2 control-label" })
+            <div class="col-md-10">
+                @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" class="btn btn-default" value="Register" />
+            </div>
+        </div>
+    }
+
+
+
+    @section Scripts {
+        @Scripts.Render("~/bundles/jqueryval")
+    }*@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>AdminLTE 3 | Registration Page</title>
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <!-- Google Font: Source Sans Pro -->
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    @Styles.Render("~/admin-lte/css")
+
+    @*Included jquery into the entire project here..*@
+    <script type="text/javascript" src="~/admin-lte/plugins/jquery/jquery.min.js"></script>
+</head>
+<body class="hold-transition register-page">
+    <div class="register-box">
+        <div class="register-logo">
+            <b>PMP REGISTER ADMIN</b>
+        </div>
+        <div class="card">
+            <div class="card-body register-card-body">
+                <p class="login-box-msg">Register a new admin</p>
+
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @using (Html.BeginForm("Register", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { role = "form", id = "registerForm" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <hr />
+                    <div class="form-group mb-3">
+                        <div class="input-group mb-3">
+                            @Html.EditorFor(m => m.UserName,
+                                new
+                                {
+                                    htmlAttributes = new
+                                    {
+                                        @class = "form-control",
+                                        @placeholder = "Enter full name of new admin",
+                                        @id = "userNameRegTextBox",
+                                        @required = "true"
+                                    }
+                                }
+                                )
+                            <span class="input-group-append">
+                                <span class="input-group-text">
+                                    <span class="fas fa-user"></span>
+                                </span>
+                            </span>
+                        </div>
+                        @Html.ValidationMessageFor(m => m.UserName, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <div class="input-group mb-3">
+                            @Html.EditorFor(m => m.Email,
+                                new
+                                {
+                                    htmlAttributes = new
+                                    {
+                                        @class = "form-control",
+                                        @placeholder = "Enter email of new admin",
+                                        @id = "emailRegTextBox",
+                                        @required = "true"
+                                    }
+                                }
+                                )
+                            <span class="input-group-append">
+                                <span class="input-group-text">
+                                    <span class="fas fa-envelope"></span>
+                                </span>
+                            </span>
+                        </div>
+                        @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <div class="input-group mb-3">
+                            @Html.EditorFor(m => m.Password,
+                                new
+                                {
+                                    htmlAttributes = new
+                                    {
+                                        @class = "form-control",
+                                        @placeholder = "Enter password of new admin",
+                                        @id = "passwordRegTextBox",
+                                        @required = "true"
+                                    }
+                                }
+                                )
+                            <span class="input-group-append">
+                                <span class="input-group-text">
+                                    <span class="fas fa-lock"></span>
+                                </span>
+                            </span>
+                        </div>
+                        @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <div class="input-group mb-3">
+                            @Html.EditorFor(m => m.ConfirmPassword,
+                                new
+                                {
+                                    htmlAttributes = new
+                                    {
+                                        @class = "form-control",
+                                        @placeholder = "Re-enter new admin password",
+                                        @id = "confirmPasswordRegTextBox",
+                                        @required = "true"
+                                    }
+                                }
+                                )
+                            <span class="input-group-append">
+                                <span class="input-group-text">
+                                    <span class="fas fa-user"></span>
+                                </span>
+                            </span>
+                        </div>
+                        @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="form-group">
+                        <input type="button" value="Register New Admin" class="btn btn-outline-dark btn-block" id="registerButton" />
+                    </div>
+                }
+
+                @Html.Hidden("postUrl", Url.Action("Register", "Account"))
+                <div><h4 id="errorMessageDiv" style="color: red; text-align: center"></h4></div>
+            </div>
+            <!-- /.form-box -->
+        </div><!-- /.card -->
+    </div>
+
+
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/admin-lte/script")
+
+    <script>
+        $("#registerButton").click(function () {
+
+            // client side validation to see if all form fields is valid..
+            if (!$("#registerForm").valid()) {
+                return false;
+            }
+
+            $("#registerButton")
+                .html('<div><span class="spinner-border text-danger" role="status">' +
+                    '</span> <span class="">Registering new admin...</span></div>');
+
+            var postUrl = $("#postUrl").val();
+            var postData = $("#registerForm").serialize();
+
+            $.ajax({
+                url: postUrl,
+                type: "post",
+                data: postData,
+                //contentType: "application/json;charset=utf-8",
+                success: function (response) {
+                    if (response.status === "ExistingEmail") {
+                        $("#registerButton").html("Register New Admin")
+                        $("#errorMessageDiv").html("Email already exist.");
+                    }
+                },
+                error: function () {
+                }
+            });
+        })
+    </script>
+
+</body>
+</html>

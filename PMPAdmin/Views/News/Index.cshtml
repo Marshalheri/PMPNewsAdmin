@@ -1,0 +1,229 @@
+﻿@*@model IEnumerable<PMPAdmin.ViewModels.ManageNewsViewModel>*@
+@model PMPAdmin.ViewModels.ManageNewsViewModel
+
+@using PMPAdmin.ViewModels
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var serialNumber = 1;
+}
+
+<!-- Content Header (Page header) -->
+<div class="content-header jumbotron">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0 text-dark">@ViewBag.Message</h1>
+            </div><!-- /.col -->
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Home</a></li>
+                    <li class="breadcrumb-item active">News</li>
+                </ol>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div>
+<!-- /.content-header -->
+<!--Add news card start here...-->
+
+<div class="row">
+    <div class="jumbotron col-md-6 ml-auto mr-auto">
+        <div class="card card-navy">
+            <div class="card-header">
+                <h3 class="card-title"><b>Add New News Category</b></h3>
+
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" data-toggle="tooltip" title="Collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @using (Html.BeginForm("Create", "News", null, FormMethod.Post, new { name = "newNewsForm", role = "form", id = "newNewsForm" }))
+                {
+                    @Html.AntiForgeryToken()
+
+                    <div class="form-group mb-3">
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                @Html.LabelFor(m => m.Type, new { @class = "input-group-text" })
+                            </div>
+                            @Html.DropDownListFor(m => m.Type, Model.NewsTypes,
+                                "Select Type", new { @class = "custom-select", id = "newsTypeDropDown" })
+                        </div>
+                        <p id="newsTypeErrorDiv" class="errorText"></p>
+                        @Html.ValidationMessageFor(m => m.Type, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="form-group mb-3 hiddenDiv" id="newsCategoryDiv">
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                @Html.LabelFor(m => m.CategoryId, new { @class = "input-group-text" })
+                            </div>
+                            @Html.DropDownListFor(m => m.CategoryId,
+                                Model.NewsCategoryList,
+                                "Select News Category",
+                                new { @class = "custom-select", id = "newsCategoryIdDropDown" })
+                            <p id="newsCategoryErrorDiv" class="errorText"></p>
+                            @Html.ValidationMessageFor(m => m.CategoryId, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-3 hiddenDiv" id="newsTitleDiv">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                @Html.LabelFor(model => model.Title, new { @class = "input-group-text" })
+                            </div>
+                            @Html.TextBoxFor(m => m.Title,
+                                new
+                                {
+                                    @class = "form-control",
+                                    id = "newsTitleTextBox"
+                                })
+                        </div>
+                        <div id="newsTitleErrorDiv" class="errorText"></div>
+                        @Html.ValidationMessageFor(m => m.Title, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="form-group mb-3 hiddenDiv" id="newsDetailsDiv">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                @Html.LabelFor(model => model.Details, new { @class = "input-group-text" })
+                            </div>
+                            @Html.TextAreaFor(m => m.Details,
+                                new
+                                {
+                                    @class = "form-control",
+                                    rows = "5",
+                                    id = "newsDetailsTextBox"
+                                })
+                        </div>
+                        <div id="newsDetailsErrorDiv" class="errorText"></div>
+                        @Html.ValidationMessageFor(m => m.Details, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                        </div>
+                        <div class="col-md-8">
+                        </div>
+                    </div>
+                            <div class="form-group mb-3 hiddenDiv" id="newsImageDiv">
+                                @Html.TextBoxFor(m => m.ImagePath, new { type = "file", id = "newsImageFileBox" })
+
+                                <div id="newsImageErrorDiv" class="errorText"></div>
+                                @Html.ValidationMessageFor(m => m.ImagePath, "", new { @class = "text-danger" })
+                            </div>
+                            <div id="newsImagePreviewDiv" class="thumbnail hiddenDiv">
+                                <img class="img-responsive" id="newsImagePreviewImg"/>
+                                <a href="#" type="button" class="btn btn-danger btn-block" onclick="ClearImage()"><i class="fas fa-trash"></i>Clear Image</a>
+                            </div>
+
+                    @Html.Hidden("postUrl", Url.Action("Create", "News"))
+                    <button class="btn btn-outline-dark" type="button" id="newNewsFormBtn">Create News</button>
+                }
+            </div>
+            <!-- /.card-body -->
+        </div>
+    </div>
+</div>
+
+
+
+<!--News table starts here-->
+<div class="col-md-11 ml-auto mr-auto">
+    <div class="card card-navy">
+        <div class="card-header text-center">
+            <h3 class="card-title"><b>Available News Categories</b></h3>
+        </div>
+        <!-- /.card-header -->
+        <div class="card-body table-responsive">
+            @{
+                if (!Model.News.Any())
+                {
+                    <h1 class="text-center"> THERE IS CURRENTLY NO NEWS IN THE DATABASE </h1>
+                }
+                else
+                {
+                    <table id="newsCategoryTable" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>S/N</th>
+                                <th>@Html.DisplayFor(m => m.Type)</th>
+                                <th>@Html.DisplayFor(m => m.CategoryId)</th>
+                                <th>@Html.DisplayFor(m => m.AddedById)</th>
+                                <th>@Html.DisplayFor(m => m.Title)</th>
+                                <th>@Html.DisplayFor(m => m.Trending)</th>
+                                <th>@Html.DisplayFor(m => m.TimeCreated)/th>
+                                <th>@Html.DisplayFor(m => m.TimeModified)</th>
+                                <th>@Html.DisplayFor(m => m.ImagePath)/th>
+                                <th>@Html.DisplayFor(m => m.VideoPath)</th>
+                                <th>@Html.DisplayFor(m => m.Status)</th>
+                                <th>@Html.DisplayFor(m => m.Details)</th>
+                                <th>@Html.DisplayFor(m => m.IsActive)</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="newsCategoryTableBody">
+
+                            @foreach (var item in Model.News)
+                            {
+                                <tr>
+                                    <td>@serialNumber </td>
+                                    <td>@item.Type</td>
+                                    <td>@item.CategoryId</td>
+                                    <td>@item.AddedById</td>
+                                    <td>@item.Title</td>
+                                    <td>@item.Trending</td>
+                                    <td>@item.TimeCreated</td>
+                                    <td>@item.TimeModified</td>
+                                    <td>@item.ImagePath</td>
+                                    <td>@item.VideoPath</td>
+                                    <td>@item.Status</td>
+                                    <td>@item.Details</td>
+                                    <td>@item.IsActive</td>
+                                    <td>
+                                        <a href="#"
+                                           type="button"
+                                           class="btn btn-primary"
+                                           id="editNewsBtn"
+                                           onclick="Edit('@item.Id')">Edit</a>
+                                        <a href="#"
+                                           type="button"
+                                           class="btn btn-danger"
+                                           id="deleteNewsBtn"
+                                           onclick="confirmDeleteCategory(@item.Id)">Delete<i class="fas fa-trash-alt"></i></a>
+                                        @Html.Hidden("editUrl", Url.Action("Edit", "News"))
+                                        @Html.Hidden("deleteUrl", Url.Action("Delete", "News"))
+                                    </td>
+                                </tr>
+                                serialNumber = serialNumber + 1;
+                            }
+
+                        </tbody>
+
+                        <tfoot>
+                        </tfoot>
+                    </table>
+                }
+            }
+            <!-- news table card-body ends here... -->
+        </div>
+    </div>
+    <!-- news table ends here... -->
+</div>
+
+
+@section scripts
+{
+    <script type="text/javascript" src="~/MyJsFiles/News.js"></script>
+    <!-- category table script -->
+    <script>
+        $(function () {
+            $("#newsCategoryTable").DataTable();
+        });
+    </script>
+}
